@@ -1,17 +1,44 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import { createRoot } from "react-dom/client";
+import SeasonDisplay from "./SeasonDisplay";
+import Spinner from "./Spinner";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+class App extends React.Component {
+  state = { lat: null, errorMessage: '' };
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+  componentDidMount (){
+    window.navigator.geolocation.getCurrentPosition(
+      position => this.setState({ lat: position.coords.latitude }),
+      error => this.setState({ errorMessage: error.message})
+    );
+  }
+
+  renderContent () {
+    if (this.state.errorMessage) {
+      return (
+        <div>
+          <h1>Error: {this.state.errorMessage}</h1>
+        </div>
+      )      
+    }
+
+    if(this.state.lat) {
+      return (
+        <SeasonDisplay latitude={this.state.lat}/>
+      )
+    }
+
+    return   <Spinner message="Please allow access to read location"/>;    
+  }
+
+  render() {
+    return(
+      <div>
+        {this.renderContent()}
+      </div>
+    )
+  }
+}
+const container = document.getElementById("root");
+const root = createRoot(container);
+root.render(<App/>);
